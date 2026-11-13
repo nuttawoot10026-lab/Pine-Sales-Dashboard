@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>แดชบอร์ดขาย Shopee</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>html, body { margin: 0; } :root { color-scheme: light; }
+[hidden] { display: none !important; }
+
+/* Layout: one narrow-to-wide column; sticky tab bar; overview = filters, four totals, bridge + cost bars, monthly chart.
+   Colors: sales = blue, cost = orange, profit = aqua (validated categorical slots 1-3); everything else is neutral ink. */
+:root {
+  --bg: #f3f3f0; --surface: #fcfcfb; --ink: #1a1a19; --ink2: #52514e; --muted: #6b6a64;
+  --line: #e2e1dc; --line2: #cfcec8; --field: #ffffff;
+  --accent: #2a78d6; --on-accent: #ffffff;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --crit: #c23232; --good: #0a7d0a; --hover: #ecece8; --warnbg: #fff4d6; --warnink: #6a4b00;
+  --font: "IBM Plex Sans Thai", "Noto Sans Thai", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121211; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #9a998f;
+    --line: #2f2f2c; --line2: #43433f; --field: #222220;
+    --accent: #3987e5; --on-accent: #0b0b0b;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --crit: #ec6b6b; --good: #4cc24c; --hover: #262624; --warnbg: #3a2f10; --warnink: #f3d38a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121211; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #9a998f;
+  --line: #2f2f2c; --line2: #43433f; --field: #222220;
+  --accent: #3987e5; --on-accent: #0b0b0b;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+  --crit: #ec6b6b; --good: #4cc24c; --hover: #262624; --warnbg: #3a2f10; --warnink: #f3d38a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1080px; margin: 0 auto; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; padding: 20px 0 12px; }
+h1 { font-size: 24px; font-weight: 700; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+.sync { font-size: 12.5px; color: var(--muted); }
+h2 { font-size: 16px; font-weight: 600; margin: 0 0 12px; }
+.tabbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); display: flex; gap: 4px; padding: 6px 0 8px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.tab { font: inherit; font-weight: 500; color: var(--ink2); background: none; border: 0; padding: 8px 14px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.tab:hover { background: var(--hover); }
+.tab[aria-selected="true"] { color: var(--ink); background: var(--surface); box-shadow: inset 0 -2px 0 var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+main { padding-top: 16px; display: grid; gap: 16px; }
+.panel[hidden] { display: none !important; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: end; }
+label.f { display: grid; gap: 4px; font-size: 13px; color: var(--ink2); font-weight: 500; min-width: 0; }
+select, input[type="text"], input[type="number"], input[type="date"], input[type="email"], input[type="password"] { font: inherit; color: var(--ink); background: var(--field); border: 1px solid var(--line2); border-radius: 8px; padding: 8px 10px; min-width: 0; width: 100%; }
+.filters select { min-width: 170px; width: auto; }
+.hint { font-size: 13px; color: var(--muted); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.kpi .lab { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--ink2); font-weight: 500; }
+.sw { width: 10px; height: 10px; border-radius: 2px; flex: none; background: var(--muted); }
+.kpi .val { font-size: 26px; font-weight: 700; letter-spacing: -0.01em; margin-top: 6px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.kpi .sub { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.neg { color: var(--crit); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 12.5px; font-weight: 600; color: var(--ink2); background: transparent; }
+tr.strong td { font-weight: 600; background: var(--hover); }
+td.m { color: var(--muted); }
+.scroll { overflow-x: auto; }
+.bars { display: grid; gap: 12px; }
+.brow { display: grid; grid-template-columns: 112px 1fr auto; gap: 10px; align-items: center; font-size: 14px; }
+.brow .name { color: var(--ink2); }
+.track { height: 14px; }
+.fill { height: 100%; background: var(--s2); border-radius: 0 4px 4px 0; min-width: 2px; }
+.brow .v { font-variant-numeric: tabular-nums; text-align: right; min-width: 118px; }
+.brow .v span { color: var(--muted); font-size: 12.5px; margin-left: 6px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--ink2); margin-bottom: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; }
+.chartbox { position: relative; }
+.chartbox svg { display: block; width: 100%; height: auto; font-family: var(--font); }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line2); border-radius: 8px; padding: 8px 10px; font-size: 13px; box-shadow: 0 4px 14px rgba(0,0,0,.14); z-index: 3; min-width: 170px; }
+.tip b { display: block; margin-bottom: 4px; }
+.tip div { display: flex; justify-content: space-between; gap: 16px; font-variant-numeric: tabular-nums; }
+.tip i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
+.formgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px 16px; }
+.formgrid .wide { grid-column: 1 / -1; }
+.auto { font-size: 12px; color: var(--muted); font-weight: 400; }
+.preview { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 16px; padding: 12px; border-radius: 8px; background: var(--hover); }
+.preview div { font-size: 13px; color: var(--ink2); }
+.preview strong { display: block; font-size: 16px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.btn { font: inherit; font-weight: 600; background: var(--accent); color: var(--on-accent); border: 0; border-radius: 8px; padding: 9px 18px; cursor: pointer; }
+.btn.ghost { background: none; color: var(--ink); border: 1px solid var(--line2); font-weight: 500; }
+.btn.small { padding: 4px 10px; font-size: 13px; }
+.btn.danger { color: var(--crit); }
+.btn:disabled { opacity: .5; cursor: default; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; align-items: center; }
+.err { color: var(--crit); font-size: 13px; min-height: 1.4em; }
+.ok { color: var(--good); font-size: 13px; }
+.banner { background: var(--warnbg); color: var(--warnink); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+.sortbar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; margin-bottom: 12px; }
+.sortbar select { width: auto; min-width: 150px; }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--ink); }
+.empty { text-align: center; color: var(--muted); padding: 28px 8px; }
+.note { color: var(--muted); font-size: 12.5px; max-width: 18ch; overflow: hidden; text-overflow: ellipsis; }
+td .rowbtns { display: flex; gap: 6px; justify-content: flex-end; }
+.settingsgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 16px; }
+td input { padding: 6px 8px; }
+.iogrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px 32px; }
+.iogrid b { font-weight: 600; }
+input[type="file"] { font: inherit; color: var(--ink2); max-width: 100%; }
+.prev { margin-top: 12px; padding: 12px; border-radius: 8px; background: var(--hover); font-size: 14px; }
+.prev table { margin-top: 8px; font-size: 13px; }
+.prev th, .prev td { padding: 4px 8px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width .25s ease; } }
+
+.login { max-width: 420px; margin: 12vh auto 0; }
+.login h1 { margin-bottom: 4px; }
+.login form { display: grid; gap: 14px; margin-top: 16px; }
+.topright { display: flex; gap: 12px; align-items: center; }
+</style>
+</head>
+<body>
+<div class="login" id="login" hidden>
+  <div class="card">
+    <h1>แดชบอร์ดขาย Shopee</h1>
+    <div class="hint" id="loginMsg">เข้าสู่ระบบเพื่อดูและบันทึกข้อมูล</div>
+    <form id="loginForm" novalidate>
+      <label class="f">อีเมล<input type="email" id="lEmail" autocomplete="username" inputmode="email"></label>
+      <label class="f">รหัสผ่าน<input type="password" id="lPass" autocomplete="current-password"></label>
+      <div class="err" id="loginErr" role="alert"></div>
+      <button class="btn" type="submit" id="loginBtn">เข้าสู่ระบบ</button>
+    </form>
+  </div>
+</div>
+<div class="wrap" id="app" hidden>
+  <header class="top">
+    <h1>แดชบอร์ดขาย Shopee</h1>
+    <div class="topright"><div class="sync" id="sync" aria-live="polite">กำลังโหลดข้อมูล…</div><button class="btn ghost small" type="button" id="signOut">ออกจากระบบ</button></div>
+  </header>
+  <nav class="tabbar" role="tablist" aria-label="เมนู">
+    <button class="tab" role="tab" data-tab="overview" id="t-overview">ภาพรวม</button>
+    <button class="tab" role="tab" data-tab="add" id="t-add">บันทึกขาย</button>
+    <button class="tab" role="tab" data-tab="list" id="t-list">รายการขาย</button>
+    <button class="tab" role="tab" data-tab="settings" id="t-settings">ตั้งค่า</button>
+  </nav>
+  <div id="banner" class="banner" hidden style="margin-top:12px"></div>
+
+  <main>
+    <!-- ภาพรวม -->
+    <section class="panel" id="p-overview" role="tabpanel" aria-labelledby="t-overview" style="display:grid;gap:16px">
+      <div class="card filters">
+        <label class="f">เดือน<select id="fMonth"></select></label>
+        <label class="f">ชนิดพืช<select id="fPlant"></select></label>
+        <div class="hint" id="fHint"></div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="two">
+        <div class="card"><h2>จากยอดขายสู่กำไร</h2><div class="scroll"><table id="bridge"></table></div></div>
+        <div class="card"><h2>โครงสร้างต้นทุน</h2><div class="bars" id="costBars"></div></div>
+      </div>
+      <div class="card">
+        <h2>ยอดขาย ต้นทุน กำไร รายเดือน</h2>
+        <div class="legend" id="legend"></div>
+        <div class="chartbox" id="chartbox"><svg id="chart" role="img" aria-label="กราฟแท่งเปรียบเทียบยอดขาย ต้นทุน และกำไรรายเดือน"></svg><div class="tip" id="tip" hidden></div></div>
+        <div class="scroll" style="margin-top:12px"><table id="monthTable"></table></div>
+        <p class="hint" style="margin:10px 0 0" id="monthNote"></p>
+      </div>
+    </section>
+
+    <!-- บันทึกขาย -->
+    <section class="panel" id="p-add" role="tabpanel" aria-labelledby="t-add" hidden>
+      <form class="card" id="form" novalidate>
+        <h2 id="formTitle">บันทึกรายการขาย</h2>
+        <div class="formgrid">
+          <label class="f">วันที่<input type="date" id="fDate" required></label>
+          <label class="f">ชนิดพืช<select id="fPlantSel" required></select></label>
+          <label class="f">จำนวนที่สั่ง (ต้น)<input type="number" id="fQty" min="1" step="1" inputmode="numeric"></label>
+          <label class="f">ราคาขายต่อต้น <span class="auto">ดึงจากตั้งค่า แก้ได้</span><input type="number" id="fPrice" min="0" step="any" inputmode="decimal"></label>
+          <label class="f">รายได้ <span class="auto">ราคา × จำนวน แก้ได้</span><input type="number" id="fRev" min="0" step="any" inputmode="decimal"></label>
+          <label class="f">ค่าธรรมเนียม Shopee<input type="number" id="fFee" min="0" step="any" inputmode="decimal"></label>
+          <label class="f">รายได้สุทธิ <span class="auto">รายได้ − ค่าธรรมเนียม แก้ได้</span><input type="number" id="fNet" step="any" inputmode="decimal"></label>
+          <label class="f">ค่าส่ง (ถ้ามี)<input type="number" id="fShip" min="0" step="any" inputmode="decimal"></label>
+          <label class="f wide">หมายเหตุ<input type="text" id="fNote" maxlength="200" placeholder="เช่น คืนเงิน 1 ต้น"></label>
+        </div>
+        <div class="preview" id="preview"></div>
+        <div class="actions">
+          <button class="btn" type="submit" id="saveBtn">บันทึกรายการ</button>
+          <button class="btn ghost" type="button" id="cancelBtn" hidden>ยกเลิกการแก้ไข</button>
+          <span class="err" id="formErr" role="alert"></span><span class="ok" id="formOk" aria-live="polite"></span>
+        </div>
+        <p class="hint" style="margin:12px 0 0">ต้นทุนกล่อง ค่าแพ็ค และต้นทุนต้นไม้คำนวณตามกติกาในแท็บตั้งค่า และบันทึกไว้กับรายการนั้น ถ้าเปลี่ยนราคาภายหลัง รายการเก่าจะไม่เปลี่ยนตาม</p>
+      </form>
+    </section>
+
+    <!-- รายการขาย -->
+    <section class="panel" id="p-list" role="tabpanel" aria-labelledby="t-list" hidden>
+      <div class="card">
+        <div class="sortbar">
+          <label class="f">เรียงตาม
+            <select id="sortKey">
+              <option value="date">วันที่</option><option value="plant">ชนิดพืช</option><option value="qty">จำนวนต้น</option>
+              <option value="revenue">ยอดขาย</option><option value="net">รายได้สุทธิ</option><option value="cost">ต้นทุน</option><option value="profit">กำไร</option>
+            </select></label>
+          <label class="f">ลำดับ<select id="sortDir"><option value="desc">มากไปน้อย / ใหม่ไปเก่า</option><option value="asc">น้อยไปมาก / เก่าไปใหม่</option></select></label>
+          <div class="hint" id="listHint"></div>
+        </div>
+        <div class="scroll"><table id="salesTable"></table></div>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <h2>นำเข้าและส่งออก</h2>
+        <div class="iogrid">
+          <div id="exportBox">
+            <b>ส่งออก</b>
+            <div class="hint">ดาวน์โหลดรายการขายทั้งหมด ไม่ขึ้นกับตัวกรองเดือนและชนิดพืช</div>
+            <div class="actions"><button class="btn ghost" type="button" id="expXlsx">ดาวน์โหลด Excel (.xlsx)</button><button class="btn ghost" type="button" id="expCsv">ดาวน์โหลด CSV</button></div>
+          </div>
+          <div id="importBox">
+            <b>นำเข้าจากไฟล์</b>
+            <div class="hint">เลือกไฟล์ .xlsx หรือ .csv ที่มีหัวคอลัมน์เหมือนชีต Shoppee (วันที่ ชนิดพืช ราคาขาย จำนวนที่สั่ง รายได้ ค่าธรรมเนียม รายได้สุทธิ ค่าส่ง ต้นทุนกล่อง ต้นทุนการแพ็ค ต้นทุนต้นไม้ หมายเหตุ) ช่องที่ว่างระบบคำนวณให้ และข้ามรายการที่ซ้ำกับที่มีอยู่แล้ว</div>
+            <div class="actions"><input type="file" id="importFile" accept=".xlsx,.csv" aria-label="เลือกไฟล์นำเข้า"></div>
+            <div id="importPreview"></div>
+          </div>
+        </div>
+        <div class="err" id="ioErr" role="alert" style="margin-top:12px"></div><div class="ok" id="ioOk" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- ตั้งค่า -->
+    <section class="panel" id="p-settings" role="tabpanel" aria-labelledby="t-settings" hidden style="display:grid;gap:16px">
+      <div class="card">
+        <h2>ชนิดพืชและราคา</h2>
+        <div class="scroll"><table id="plantTable"></table></div>
+        <div class="actions"><button class="btn ghost small" type="button" id="addPlant">เพิ่มชนิดพืช</button></div>
+      </div>
+      <div class="card">
+        <h2>กติกาคิดกล่องและค่าแพ็ค</h2>
+        <div class="settingsgrid">
+          <label class="f">ค่าแพ็คต่อออเดอร์ (บาท)<input type="number" id="sPack" min="0" step="any"></label>
+          <label class="f">ราคากล่อง AH (บาท)<input type="number" id="sAh" min="0" step="any"></label>
+          <label class="f">ราคากล่อง BH (บาท)<input type="number" id="sBh" min="0" step="any"></label>
+          <label class="f">ใช้กล่อง AH เมื่อจำนวนไม่เกิน (ต้น)<input type="number" id="sAhMax" min="1" step="1"></label>
+          <label class="f">ใช้กล่อง BH เมื่อจำนวนไม่เกิน (ต้น)<input type="number" id="sBhMax" min="1" step="1"></label>
+          <label class="f">เกินนั้น ใช้กล่อง AH จำนวน (กล่อง)<input type="number" id="sBig" min="1" step="1"></label>
+        </div>
+        <p class="hint" id="ruleText" style="margin:12px 0 0"></p>
+        <div class="actions">
+          <button class="btn" type="button" id="saveSettings">บันทึกการตั้งค่า</button>
+          <span class="err" id="setErr" role="alert"></span><span class="ok" id="setOk" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ===== ใส่ค่าจาก Firebase ตรงนี้ (ขั้นตอนที่ 2 ในคู่มือ) =====
+   ค่าเหล่านี้ไม่ใช่รหัสลับ ความปลอดภัยของข้อมูลอยู่ที่ Firestore Rules */
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCBYFjI3y5LfIaVB7U-EXrtxNkiISlDlfQ",
+  authDomain: "shopee-dashboard-bfa20.firebaseapp.com",
+  projectId: "shopee-dashboard-bfa20",
+  appId: "1:889337639148:web:58f847afa28468bb4635c9"
+};
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+(function () {
+  "use strict";
+  var TH_M = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  var $ = function (id) { return document.getElementById(id); };
+  var db = null, canWrite = true;
+  var sales = [], config = null, loaded = { sales: false, config: false };
+  var state = { month: "all", plant: "all", sortKey: "date", sortDir: "desc", editId: null, tab: "overview" };
+  var settingsDirty = false, draftPlants = [];
+
+  /* ---------- helpers ---------- */
+  function n(v) { var x = Number(v); return isFinite(x) ? x : 0; }
+  function fmt(v) { return n(v).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmt0(v) { return n(v).toLocaleString("en-US", { maximumFractionDigits: 0 }); }
+  function pct(v) { return (n(v) * 100).toFixed(1) + "%"; }
+  function ymOf(d) { return String(d || "").slice(0, 7); }
+  function monthLabel(k) { var p = k.split("-"); return TH_M[+p[1] - 1] + " " + (+p[0] + 543); }
+  function dayLabel(d) { var p = String(d).split("-"); return (+p[2]) + " " + TH_M[+p[1] - 1] + " " + (+p[0] + 543); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function todayISO() { var d = new Date(); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+  function round2(x) { return Math.round(x * 100) / 100; }
+
+  function calc(r) {
+    var tree = n(r.qty) * n(r.treeUnit);
+    var cost = n(r.ship) + n(r.box) + n(r.pack) + tree;
+    return { tree: tree, cost: cost, profit: n(r.net) - cost };
+  }
+  function agg(rows) {
+    var a = { n: rows.length, qty: 0, revenue: 0, fee: 0, net: 0, ship: 0, box: 0, pack: 0, tree: 0, cost: 0, profit: 0 };
+    rows.forEach(function (r) {
+      var c = calc(r);
+      a.qty += n(r.qty); a.revenue += n(r.revenue); a.fee += n(r.fee); a.net += n(r.net);
+      a.ship += n(r.ship); a.box += n(r.box); a.pack += n(r.pack); a.tree += c.tree; a.cost += c.cost; a.profit += c.profit;
+    });
+    return a;
+  }
+  function rowsFor(month, plant) {
+    return sales.filter(function (r) {
+      return (month === "all" || ymOf(r.date) === month) && (plant === "all" || r.plant === plant);
+    });
+  }
+  function boxCost(q) {
+    var c = config || {};
+    if (q <= n(c.ahMax)) return n(c.ah);
+    if (q <= n(c.bhMax)) return n(c.bh);
+    return n(c.big) * n(c.ah);
+  }
+  function plantInfo(name) {
+    var list = (config && config.plants) || [];
+    for (var i = 0; i < list.length; i++) if (list[i].name === name) return list[i];
+    return null;
+  }
+  function sgn(v) { return v < 0 ? "neg" : ""; }
+
+  /* ---------- tabs ---------- */
+  var TABS = ["overview", "add", "list", "settings"];
+  function showTab(t) {
+    if (TABS.indexOf(t) < 0) t = "overview";
+    state.tab = t;
+    TABS.forEach(function (k) {
+      $("p-" + k).hidden = k !== t;
+      $("t-" + k).setAttribute("aria-selected", k === t ? "true" : "false");
+    });
+    if (t === "overview") drawChart();
+  }
+  document.querySelector(".tabbar").addEventListener("click", function (e) {
+    var b = e.target.closest(".tab"); if (!b) return;
+    location.hash = b.dataset.tab;
+  });
+  window.addEventListener("hashchange", function () { showTab(location.hash.replace("#", "")); });
+
+  /* ---------- filters ---------- */
+  function renderFilters() {
+    var months = Array.from(new Set(sales.map(function (r) { return ymOf(r.date); }))).sort();
+    var plants = Array.from(new Set(sales.map(function (r) { return r.plant; })));
+    ((config && config.plants) || []).forEach(function (p) { if (plants.indexOf(p.name) < 0) plants.push(p.name); });
+    if (state.month !== "all" && months.indexOf(state.month) < 0) state.month = "all";
+    if (state.plant !== "all" && plants.indexOf(state.plant) < 0) state.plant = "all";
+    $("fMonth").innerHTML = '<option value="all">ทั้งหมด (ทุกเดือน)</option>' + months.map(function (m) { return '<option value="' + m + '">' + monthLabel(m) + "</option>"; }).join("");
+    $("fPlant").innerHTML = '<option value="all">ทั้งหมด (ทุกชนิด)</option>' + plants.map(function (p) { return '<option value="' + esc(p) + '">' + esc(p) + "</option>"; }).join("");
+    $("fMonth").value = state.month; $("fPlant").value = state.plant;
+  }
+  $("fMonth").addEventListener("change", function () { state.month = this.value; renderAll(); });
+  $("fPlant").addEventListener("change", function () { state.plant = this.value; renderAll(); });
+
+  /* ---------- overview ---------- */
+  function renderOverview() {
+    var rows = rowsFor(state.month, state.plant), a = agg(rows);
+    var base = a.revenue || 0;
+    $("fHint").textContent = rows.length + " รายการ · " + fmt0(a.qty) + " ต้น";
+    var feeP = base ? a.fee / base : 0, costP = base ? a.cost / base : 0, profP = base ? a.profit / base : 0;
+    var k = [
+      ["ยอดขายรวม", a.revenue, "var(--s1)", rows.length + " ออเดอร์ · " + fmt0(a.qty) + " ต้น"],
+      ["ยอดขายสุทธิ (หักค่าธรรมเนียม)", a.net, "", "ค่าธรรมเนียม " + fmt(a.fee) + " (" + pct(feeP) + ")"],
+      ["ต้นทุนรวม", a.cost, "var(--s2)", "คิดเป็น " + pct(costP) + " ของยอดขายรวม"],
+      ["กำไรรวม", a.profit, "var(--s3)", "กำไร " + pct(profP) + " ของยอดขายรวม"]
+    ];
+    $("kpis").innerHTML = k.map(function (x) {
+      return '<div class="kpi"><div class="lab"><span class="sw"' + (x[2] ? ' style="background:' + x[2] + '"' : "") + '></span>' + x[0] +
+        '</div><div class="val ' + sgn(x[1]) + '">฿' + fmt(x[1]) + '</div><div class="sub">' + x[3] + "</div></div>";
+    }).join("");
+
+    var br = [
+      ["ยอดขายรวม", a.revenue, false], ["หัก ค่าธรรมเนียม", a.fee, false], ["รายได้สุทธิ", a.net, true],
+      ["หัก ต้นทุนรวม", a.cost, false], ["กำไรรวม", a.profit, true]
+    ];
+    $("bridge").innerHTML = '<thead><tr><th>รายการ</th><th>จำนวนเงิน (บาท)</th><th>% ยอดขาย</th></tr></thead><tbody>' +
+      br.map(function (r) { return '<tr class="' + (r[2] ? "strong" : "") + '"><td>' + r[0] + '</td><td class="' + sgn(r[1]) + '">' + fmt(r[1]) + '</td><td class="m">' + (base ? pct(r[1] / base) : "-") + "</td></tr>"; }).join("") + "</tbody>";
+
+    var parts = [["ต้นทุนต้นไม้", a.tree], ["ค่าส่ง", a.ship], ["ต้นทุนกล่อง", a.box], ["ต้นทุนการแพ็ค", a.pack]];
+    var max = Math.max.apply(null, parts.map(function (p) { return p[1]; }).concat([0.0001]));
+    $("costBars").innerHTML = parts.map(function (p) {
+      return '<div class="brow"><div class="name">' + p[0] + '</div><div class="track"><div class="fill" style="width:' + (p[1] / max * 100) + '%"></div></div><div class="v">' + fmt(p[1]) + "<span>" + (a.cost ? pct(p[1] / a.cost) : "-") + "</span></div></div>";
+    }).join("") + '<div class="hint">ต้นทุนรวม ' + fmt(a.cost) + " บาท</div>";
+    renderMonthly();
+  }
+
+  var monthData = [];
+  function monthRange() {
+    var ks = sales.map(function (r) { return ymOf(r.date); }).filter(Boolean).sort();
+    if (!ks.length) return [];
+    var p = ks[0].split("-"), q = ks[ks.length - 1].split("-");
+    var y = +p[0], m = +p[1], out = [];
+    while (y < +q[0] || (y === +q[0] && m <= +q[1])) {
+      out.push(y + "-" + String(m).padStart(2, "0"));
+      m++; if (m > 12) { m = 1; y++; }
+    }
+    return out.slice(-6);
+  }
+  function renderMonthly() {
+    var ms = monthRange();
+    monthData = ms.map(function (k) { var a = agg(rowsFor(k, state.plant)); return { key: k, label: monthLabel(k), n: a.n, qty: a.qty, revenue: a.revenue, cost: a.cost, profit: a.profit }; });
+    $("legend").innerHTML = '<span><i style="background:var(--s1)"></i>ยอดขายรวม</span><span><i style="background:var(--s2)"></i>ต้นทุนรวม</span><span><i style="background:var(--s3)"></i>กำไรรวม</span>';
+    var tot = agg(rowsFor("all", state.plant));
+    $("monthTable").innerHTML = '<thead><tr><th>เดือน</th><th>ออเดอร์</th><th>จำนวนต้น</th><th>ยอดขายรวม</th><th>ต้นทุนรวม</th><th>กำไรรวม</th><th>% กำไร/ยอดขาย</th></tr></thead><tbody>' +
+      (monthData.length ? monthData.map(function (r) {
+        return '<tr style="' + (state.month === r.key ? "background:var(--hover)" : "") + '"><td>' + r.label + "</td><td>" + fmt0(r.n) + "</td><td>" + fmt0(r.qty) + "</td><td>" + fmt(r.revenue) + "</td><td>" + fmt(r.cost) + '</td><td class="' + sgn(r.profit) + '">' + fmt(r.profit) + '</td><td class="m">' + (r.revenue ? pct(r.profit / r.revenue) : "-") + "</td></tr>";
+      }).join("") : '<tr><td colspan="7" class="empty">ยังไม่มีรายการขาย บันทึกรายการแรกได้ที่แท็บ "บันทึกขาย"</td></tr>') +
+      '<tr class="strong"><td>รวมทั้งหมด</td><td>' + fmt0(tot.n) + "</td><td>" + fmt0(tot.qty) + "</td><td>" + fmt(tot.revenue) + "</td><td>" + fmt(tot.cost) + '</td><td class="' + sgn(tot.profit) + '">' + fmt(tot.profit) + '</td><td class="m">' + (tot.revenue ? pct(tot.profit / tot.revenue) : "-") + "</td></tr></tbody>";
+    $("monthNote").textContent = "กราฟและตารางแสดงสูงสุด 6 เดือนล่าสุด กรองตามชนิดพืชที่เลือก · แถวรวมทั้งหมดรวมทุกเดือน" + (state.month !== "all" ? " · เดือนที่เลือกไฮไลต์ในกราฟ" : "");
+    drawChart();
+  }
+
+  /* chart */
+  function niceStep(range, ticks) {
+    var raw = range / ticks, mag = Math.pow(10, Math.floor(Math.log10(raw || 1))), f = raw / mag;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * mag;
+  }
+  function barPath(x, w, yA, yB) { // yA = baseline y, yB = value-end y
+    var h = Math.abs(yB - yA); if (h < 0.5) return "";
+    var r = Math.min(4, h, w / 2), up = yB < yA;
+    if (up) return "M" + x + "," + yA + "V" + (yB + r) + "Q" + x + "," + yB + " " + (x + r) + "," + yB + "H" + (x + w - r) + "Q" + (x + w) + "," + yB + " " + (x + w) + "," + (yB + r) + "V" + yA + "Z";
+    return "M" + x + "," + yA + "V" + (yB - r) + "Q" + x + "," + yB + " " + (x + r) + "," + yB + "H" + (x + w - r) + "Q" + (x + w) + "," + yB + " " + (x + w) + "," + (yB - r) + "V" + yA + "Z";
+  }
+  function drawChart() {
+    var box = $("chartbox"), svg = $("chart");
+    var W = Math.max(300, box.clientWidth || 600), H = W < 480 ? 230 : 280;
+    var L = 46, R = 8, T = 10, B = 26;
+    var d = monthData;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    if (!d.length) { svg.innerHTML = '<text x="' + W / 2 + '" y="' + H / 2 + '" text-anchor="middle" fill="var(--muted)" font-size="13">ยังไม่มีข้อมูลให้แสดง</text>'; return; }
+    var vals = []; d.forEach(function (r) { vals.push(r.revenue, r.cost, r.profit); });
+    var lo = Math.min(0, Math.min.apply(null, vals)), hi = Math.max(1, Math.max.apply(null, vals));
+    var step = niceStep(hi - lo, 4);
+    hi = Math.ceil(hi / step) * step; lo = Math.floor(lo / step) * step;
+    var y = function (v) { return T + (hi - v) / (hi - lo) * (H - T - B); };
+    var out = "";
+    for (var t = lo; t <= hi + 1e-9; t += step) {
+      out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(t) + '" y2="' + y(t) + '" stroke="var(--line)" stroke-width="1"/>' +
+        '<text x="' + (L - 6) + '" y="' + (y(t) + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + fmt0(t) + "</text>";
+    }
+    var band = (W - L - R) / d.length, bw = Math.max(8, Math.min(26, band / 5)), gap = 2;
+    var colors = ["var(--s1)", "var(--s2)", "var(--s3)"], keys = ["revenue", "cost", "profit"];
+    d.forEach(function (r, i) {
+      var cx = L + band * (i + 0.5), x0 = cx - (3 * bw + 2 * gap) / 2;
+      var dim = state.month !== "all" && state.month !== r.key ? 0.35 : 1;
+      out += '<rect class="hit" data-i="' + i + '" x="' + (L + band * i) + '" y="' + T + '" width="' + band + '" height="' + (H - T - B) + '" fill="transparent"/>';
+      keys.forEach(function (k, j) {
+        out += '<path d="' + barPath(x0 + j * (bw + gap), bw, y(0), y(r[k])) + '" fill="' + colors[j] + '" opacity="' + dim + '" pointer-events="none"/>';
+      });
+      out += '<text x="' + cx + '" y="' + (H - 8) + '" text-anchor="middle" font-size="12" fill="var(--ink2)">' + r.label + "</text>";
+    });
+    out += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(0) + '" y2="' + y(0) + '" stroke="var(--line2)" stroke-width="1"/>';
+    svg.innerHTML = out;
+  }
+  var tip = $("tip");
+  function showTip(i, ev) {
+    var r = monthData[i]; if (!r) return;
+    tip.innerHTML = "<b>" + r.label + "</b>" +
+      '<div><span><i style="background:var(--s1)"></i>ยอดขายรวม</span><span>' + fmt(r.revenue) + "</span></div>" +
+      '<div><span><i style="background:var(--s2)"></i>ต้นทุนรวม</span><span>' + fmt(r.cost) + "</span></div>" +
+      '<div><span><i style="background:var(--s3)"></i>กำไรรวม</span><span class="' + sgn(r.profit) + '">' + fmt(r.profit) + "</span></div>";
+    tip.hidden = false;
+    var box = $("chartbox").getBoundingClientRect(), x = ev.clientX - box.left + 14, y = ev.clientY - box.top - 10;
+    if (x + tip.offsetWidth > box.width) x = ev.clientX - box.left - tip.offsetWidth - 14;
+    tip.style.left = Math.max(0, x) + "px"; tip.style.top = Math.max(0, y) + "px";
+  }
+  $("chart").addEventListener("pointermove", function (e) { var t = e.target; if (t.classList && t.classList.contains("hit")) showTip(+t.dataset.i, e); else tip.hidden = true; });
+  $("chart").addEventListener("pointerdown", function (e) { var t = e.target; if (t.classList && t.classList.contains("hit")) showTip(+t.dataset.i, e); });
+  $("chart").addEventListener("pointerleave", function () { tip.hidden = true; });
+  if (window.ResizeObserver) new ResizeObserver(function () { if (state.tab === "overview") drawChart(); }).observe($("chartbox"));
+
+  /* ---------- sales list ---------- */
+  function renderList() {
+    var rows = rowsFor(state.month, state.plant).map(function (r) { var c = calc(r); return Object.assign({}, r, { cost: c.cost, profit: c.profit }); });
+    var key = state.sortKey, dir = state.sortDir === "asc" ? 1 : -1;
+    rows.sort(function (a, b) {
+      var x = a[key], y = b[key];
+      var cmp = typeof x === "string" || typeof y === "string" ? String(x || "").localeCompare(String(y || ""), "th") : n(x) - n(y);
+      if (cmp === 0) cmp = String(a.date).localeCompare(String(b.date)) || String(a.createdAt || "").localeCompare(String(b.createdAt || ""));
+      return cmp * dir;
+    });
+    $("listHint").textContent = rows.length + " รายการ · ใช้ตัวกรองเดือนและชนิดพืชที่แท็บภาพรวม";
+    var heads = [["date", "วันที่"], ["plant", "ชนิดพืช"], ["qty", "ต้น"], ["revenue", "ยอดขาย"], ["net", "สุทธิ"], ["cost", "ต้นทุน"], ["profit", "กำไร"]];
+    $("salesTable").innerHTML = "<thead><tr>" + heads.map(function (h) {
+      var arrow = state.sortKey === h[0] ? (state.sortDir === "asc" ? " ▲" : " ▼") : "";
+      return '<th class="sortable" data-k="' + h[0] + '">' + h[1] + arrow + "</th>";
+    }).join("") + "<th>หมายเหตุ</th>" + (canWrite ? "<th></th>" : "") + "</tr></thead><tbody>" +
+      (rows.length ? rows.map(function (r) {
+        return "<tr><td>" + dayLabel(r.date) + "</td><td>" + esc(r.plant) + "</td><td>" + fmt0(r.qty) + "</td><td>" + fmt(r.revenue) + "</td><td>" + fmt(r.net) + "</td><td>" + fmt(r.cost) + '</td><td class="' + sgn(r.profit) + '">' + fmt(r.profit) + '</td><td><div class="note" title="' + esc(r.note || "") + '">' + esc(r.note || "") + "</div></td>" +
+          (canWrite ? '<td><div class="rowbtns"><button class="btn ghost small" data-edit="' + esc(r.id) + '">แก้ไข</button><button class="btn ghost small danger" data-del="' + esc(r.id) + '">ลบ</button></div></td>' : "") + "</tr>";
+      }).join("") : '<tr><td colspan="9" class="empty">ไม่มีรายการในช่วงที่เลือก</td></tr>') + "</tbody>";
+  }
+  $("sortKey").addEventListener("change", function () { state.sortKey = this.value; renderList(); });
+  $("sortDir").addEventListener("change", function () { state.sortDir = this.value; renderList(); });
+  var delTimer = null;
+  $("salesTable").addEventListener("click", function (e) {
+    var th = e.target.closest("th.sortable");
+    if (th) {
+      if (state.sortKey === th.dataset.k) state.sortDir = state.sortDir === "asc" ? "desc" : "asc"; else { state.sortKey = th.dataset.k; state.sortDir = th.dataset.k === "date" ? "desc" : "asc"; }
+      $("sortKey").value = state.sortKey; $("sortDir").value = state.sortDir; renderList(); return;
+    }
+    var ed = e.target.closest("[data-edit]");
+    if (ed) { startEdit(ed.dataset.edit); return; }
+    var del = e.target.closest("[data-del]");
+    if (del) {
+      if (del.dataset.armed) { doDelete(del.dataset.del); return; }
+      del.dataset.armed = "1"; del.textContent = "ยืนยันลบ?";
+      clearTimeout(delTimer); delTimer = setTimeout(function () { renderList(); }, 4000);
+    }
+  });
+  function doDelete(id) {
+    if (!db) return;
+    db.collection("sales").doc(id).delete().catch(function (e) { $("sync").textContent = "ลบไม่สำเร็จ: " + (e && e.message || e); });
+  }
+
+  /* ---------- form ---------- */
+  var F = { date: $("fDate"), plant: $("fPlantSel"), qty: $("fQty"), price: $("fPrice"), rev: $("fRev"), fee: $("fFee"), net: $("fNet"), ship: $("fShip"), note: $("fNote") };
+  function has(el) { return el.value !== ""; }
+  var touched = { price: false, rev: false, net: false };
+  function renderPlantSelect() {
+    var cur = F.plant.value, list = (config && config.plants) || [];
+    F.plant.innerHTML = list.length ? list.map(function (p) { return '<option value="' + esc(p.name) + '">' + esc(p.name) + "</option>"; }).join("") : '<option value="">(ยังไม่มีชนิดพืช — เพิ่มที่แท็บตั้งค่า)</option>';
+    if (cur && list.some(function (p) { return p.name === cur; })) F.plant.value = cur;
+    recalcForm();
+  }
+  function recalcForm() {
+    var qty = n(F.qty.value), p = plantInfo(F.plant.value);
+    if (!touched.price) F.price.value = p ? p.sell : "";
+    if (!touched.rev) F.rev.value = has(F.qty) && has(F.price) ? round2(qty * n(F.price.value)) : "";
+    if (!touched.net) F.net.value = has(F.rev) ? round2(n(F.rev.value) - n(F.fee.value)) : "";
+    var box = has(F.qty) ? boxCost(qty) : 0, pack = has(F.qty) ? n(config && config.pack) : 0, tree = qty * (p ? n(p.buy) : 0);
+    var ship = n(F.ship.value), cost = box + pack + tree + ship, profit = n(F.net.value) - cost;
+    $("preview").innerHTML = [["ต้นทุนกล่อง", box], ["ค่าแพ็ค", pack], ["ต้นทุนต้นไม้", tree], ["ค่าส่ง", ship], ["ต้นทุนรวม", cost], ["กำไรจากรายการนี้", profit]]
+      .map(function (x) { return "<div>" + x[0] + "<strong class='" + (x[0].indexOf("กำไร") === 0 ? sgn(x[1]) : "") + "'>฿" + fmt(x[1]) + "</strong></div>"; }).join("");
+  }
+  ["price", "rev", "net"].forEach(function (k) {
+    F[k].addEventListener("input", function () { touched[k] = has(F[k]); recalcForm(); });
+  });
+  ["plant", "qty", "fee", "ship"].forEach(function (k) { F[k].addEventListener("input", recalcForm); F[k].addEventListener("change", recalcForm); });
+  F.plant.addEventListener("change", function () { touched.price = false; recalcForm(); });
+
+  function resetForm(keep) {
+    var d = keep ? F.date.value : todayISO(), pl = F.plant.value;
+    ["qty", "price", "rev", "fee", "net", "ship", "note"].forEach(function (k) { F[k].value = ""; });
+    touched = { price: false, rev: false, net: false };
+    F.date.value = d; if (keep && pl) F.plant.value = pl;
+    state.editId = null; $("formTitle").textContent = "บันทึกรายการขาย"; $("saveBtn").textContent = "บันทึกรายการ"; $("cancelBtn").hidden = true;
+    recalcForm();
+  }
+  function startEdit(id) {
+    var r = sales.filter(function (x) { return x.id === id; })[0]; if (!r) return;
+    state.editId = id;
+    F.date.value = r.date; if (!plantInfo(r.plant)) { var o = document.createElement("option"); o.value = r.plant; o.textContent = r.plant; F.plant.appendChild(o); }
+    F.plant.value = r.plant; F.qty.value = r.qty; F.price.value = r.price; F.rev.value = r.revenue; F.fee.value = r.fee; F.net.value = r.net; F.ship.value = r.ship || ""; F.note.value = r.note || "";
+    touched = { price: true, rev: true, net: true };
+    $("formTitle").textContent = "แก้ไขรายการวันที่ " + dayLabel(r.date); $("saveBtn").textContent = "บันทึกการแก้ไข"; $("cancelBtn").hidden = false;
+    $("formErr").textContent = ""; $("formOk").textContent = "";
+    recalcForm(); location.hash = "add";
+  }
+  $("cancelBtn").addEventListener("click", function () { resetForm(false); });
+  $("form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    $("formErr").textContent = ""; $("formOk").textContent = "";
+    var qty = n(F.qty.value), err = "";
+    if (!db) err = "ยังเชื่อมต่อฐานข้อมูลไม่ได้";
+    else if (!F.date.value) err = "กรุณาเลือกวันที่";
+    else if (!F.plant.value) err = "กรุณาเลือกชนิดพืช (เพิ่มชนิดพืชได้ที่แท็บตั้งค่า)";
+    else if (!(qty >= 1) || Math.floor(qty) !== qty) err = "จำนวนต้นต้องเป็นจำนวนเต็มตั้งแต่ 1 ขึ้นไป";
+    else if (!has(F.price) || n(F.price.value) < 0) err = "กรุณาใส่ราคาขาย";
+    else if (!has(F.rev) || n(F.rev.value) < 0) err = "กรุณาใส่รายได้";
+    else if (n(F.fee.value) < 0 || n(F.ship.value) < 0) err = "ค่าธรรมเนียมและค่าส่งต้องไม่ติดลบ";
+    else if (!has(F.net)) err = "กรุณาใส่รายได้สุทธิ";
+    if (err) { $("formErr").textContent = err; return; }
+    var p = plantInfo(F.plant.value);
+    var editing = state.editId ? sales.filter(function (x) { return x.id === state.editId; })[0] : null;
+    var doc = {
+      date: F.date.value, plant: F.plant.value, qty: qty, price: n(F.price.value), revenue: n(F.rev.value), fee: n(F.fee.value), net: n(F.net.value), ship: n(F.ship.value),
+      box: editing ? editing.box : boxCost(qty), pack: editing ? editing.pack : n(config && config.pack),
+      treeUnit: editing ? (editing.plant === F.plant.value ? editing.treeUnit : (p ? n(p.buy) : 0)) : (p ? n(p.buy) : 0),
+      note: F.note.value.trim(), createdAt: editing && editing.createdAt ? editing.createdAt : new Date().toISOString()
+    };
+    if (editing && editing.qty !== qty) { doc.box = boxCost(qty); }
+    var ref = state.editId ? db.collection("sales").doc(state.editId) : db.collection("sales").doc();
+    $("saveBtn").disabled = true;
+    ref.set(doc).then(function () {
+      var was = !!state.editId;
+      resetForm(true);
+      $("formOk").textContent = was ? "บันทึกการแก้ไขแล้ว" : "บันทึกแล้ว ดูผลได้ที่แท็บภาพรวม";
+      if (was) location.hash = "list";
+    }).catch(function (er) {
+      $("formErr").textContent = er && er.code === "quota_exceeded" ? "พื้นที่เก็บข้อมูลเต็ม" : "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง";
+    }).then(function () { $("saveBtn").disabled = false; });
+  });
+
+  /* ---------- settings ---------- */
+  var SI = { pack: $("sPack"), ah: $("sAh"), bh: $("sBh"), ahMax: $("sAhMax"), bhMax: $("sBhMax"), big: $("sBig") };
+  function renderSettings(force) {
+    if (settingsDirty && !force) return;
+    var c = config || {};
+    Object.keys(SI).forEach(function (k) { SI[k].value = c[k] != null ? c[k] : ""; });
+    draftPlants = ((c.plants) || []).map(function (p) { return { name: p.name, buy: p.buy, sell: p.sell }; });
+    drawPlants(); ruleText();
+  }
+  function drawPlants() {
+    $("plantTable").innerHTML = "<thead><tr><th>ชนิดพืช</th><th>ราคาซื้อต่อต้น</th><th>ราคาขายต่อต้น</th><th></th></tr></thead><tbody>" +
+      (draftPlants.length ? draftPlants.map(function (p, i) {
+        return '<tr><td><input type="text" data-i="' + i + '" data-f="name" value="' + esc(p.name) + '" aria-label="ชื่อชนิดพืช"></td><td><input type="number" min="0" step="any" data-i="' + i + '" data-f="buy" value="' + esc(p.buy) + '" aria-label="ราคาซื้อ"></td><td><input type="number" min="0" step="any" data-i="' + i + '" data-f="sell" value="' + esc(p.sell) + '" aria-label="ราคาขาย"></td><td><button type="button" class="btn ghost small danger" data-rm="' + i + '">ลบ</button></td></tr>';
+      }).join("") : '<tr><td colspan="4" class="empty">ยังไม่มีชนิดพืช กดเพิ่มชนิดพืชเพื่อเริ่ม</td></tr>') + "</tbody>";
+  }
+  function ruleText() {
+    var a = n(SI.ahMax.value), b = n(SI.bhMax.value);
+    $("ruleText").textContent = "1–" + a + " ต้น ใช้กล่อง AH 1 กล่อง · " + (a + 1) + "–" + b + " ต้น ใช้กล่อง BH 1 กล่อง · เกิน " + b + " ต้น ใช้กล่อง AH " + n(SI.big.value) + " กล่อง";
+  }
+  $("plantTable").addEventListener("input", function (e) {
+    var t = e.target, i = t.dataset.i; if (i == null) return;
+    draftPlants[+i][t.dataset.f] = t.dataset.f === "name" ? t.value : t.value === "" ? "" : n(t.value); settingsDirty = true;
+  });
+  $("plantTable").addEventListener("click", function (e) {
+    var b = e.target.closest("[data-rm]"); if (!b) return;
+    draftPlants.splice(+b.dataset.rm, 1); settingsDirty = true; drawPlants();
+  });
+  $("addPlant").addEventListener("click", function () { draftPlants.push({ name: "", buy: 0, sell: 0 }); settingsDirty = true; drawPlants(); });
+  Object.keys(SI).forEach(function (k) { SI[k].addEventListener("input", function () { settingsDirty = true; ruleText(); }); });
+  $("saveSettings").addEventListener("click", function () {
+    $("setErr").textContent = ""; $("setOk").textContent = "";
+    var names = draftPlants.map(function (p) { return String(p.name).trim(); });
+    if (!db) { $("setErr").textContent = "ยังเชื่อมต่อฐานข้อมูลไม่ได้"; return; }
+    if (names.some(function (x) { return !x; })) { $("setErr").textContent = "ชื่อชนิดพืชต้องไม่ว่าง"; return; }
+    if (new Set(names).size !== names.length) { $("setErr").textContent = "ชื่อชนิดพืชซ้ำกัน"; return; }
+    var doc = { pack: n(SI.pack.value), ah: n(SI.ah.value), bh: n(SI.bh.value), ahMax: n(SI.ahMax.value), bhMax: n(SI.bhMax.value), big: n(SI.big.value),
+      plants: draftPlants.map(function (p) { return { name: String(p.name).trim(), buy: n(p.buy), sell: n(p.sell) }; }) };
+    if (!(doc.ahMax >= 1) || !(doc.bhMax >= doc.ahMax) || !(doc.big >= 1)) { $("setErr").textContent = "ตรวจจำนวนต้นของกล่อง AH และ BH อีกครั้ง (BH ต้องไม่น้อยกว่า AH)"; return; }
+    db.doc("config/main").set(doc).then(function () { settingsDirty = false; $("setOk").textContent = "บันทึกการตั้งค่าแล้ว"; })
+      .catch(function () { $("setErr").textContent = "บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง"; });
+  });
+
+  /* ---------- import / export (no external libraries) ---------- */
+  var downloads = null;
+  var HEAD = ["ครั้งที่", "วันที่", "ชนิดพืช", "ราคาขาย", "จำนวนที่สั่ง", "รายได้", "ค่าธรรมเนียม", "รายได้สุทธิ", "ค่าส่ง", "ต้นทุนกล่อง", "ต้นทุนการแพ็ค", "ต้นทุนต้นไม้", "ต้นทุนต้นไม้รวม", "ต้นทุนรวม", "กำไรรวม", "หมายเหตุ"];
+  function pad2(x) { return String(x).padStart(2, "0"); }
+  function serialOf(iso) { var p = iso.split("-"); return (Date.UTC(+p[0], +p[1] - 1, +p[2]) - Date.UTC(1899, 11, 30)) / 86400000; }
+  function isoOfSerial(s) { var d = new Date(Date.UTC(1899, 11, 30) + Math.round(s) * 86400000); return d.getUTCFullYear() + "-" + pad2(d.getUTCMonth() + 1) + "-" + pad2(d.getUTCDate()); }
+  function exportRows() {
+    return sales.slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)) || String(a.createdAt || "").localeCompare(String(b.createdAt || "")); })
+      .map(function (r, i) {
+        var c = calc(r);
+        return [i + 1, r.date, r.plant, n(r.price), n(r.qty), n(r.revenue), n(r.fee), n(r.net), n(r.ship), n(r.box), n(r.pack), n(r.treeUnit), round2(c.tree), round2(c.cost), round2(c.profit), r.note || ""];
+      });
+  }
+  var crcT = null;
+  function crc32(u8) {
+    if (!crcT) { crcT = new Uint32Array(256); for (var i = 0; i < 256; i++) { var c = i; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; crcT[i] = c >>> 0; } }
+    var c2 = 0xFFFFFFFF; for (var j = 0; j < u8.length; j++) c2 = crcT[(c2 ^ u8[j]) & 255] ^ (c2 >>> 8);
+    return (c2 ^ 0xFFFFFFFF) >>> 0;
+  }
+  function zipStore(files) {
+    var enc = new TextEncoder(), parts = [], central = [], offset = 0;
+    files.forEach(function (f) {
+      var nm = enc.encode(f.name), crc = crc32(f.data), sz = f.data.length;
+      var lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(12, 0x21, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nm.length, true);
+      parts.push(new Uint8Array(lh.buffer), nm, f.data);
+      var ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(14, 0x21, true);
+      ch.setUint32(16, crc, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), nm);
+      offset += 30 + nm.length + sz;
+    });
+    var cd = 0; central.forEach(function (p) { cd += p.length; });
+    var end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cd, true); end.setUint32(16, offset, true);
+    return new Blob(parts.concat(central, [new Uint8Array(end.buffer)]));
+  }
+  function colName(i) { var s = ""; i++; while (i > 0) { var m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+  function xmlEsc(s) { return String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function buildXlsx(aoa) {
+    var MONEY = { 3: 1, 5: 1, 6: 1, 7: 1, 8: 1, 9: 1, 10: 1, 11: 1, 12: 1, 13: 1, 14: 1 };
+    var rowsXml = aoa.map(function (row, ri) {
+      return '<row r="' + (ri + 1) + '">' + row.map(function (v, ci) {
+        var ref = colName(ci) + (ri + 1);
+        if (ri === 0) return '<c r="' + ref + '" s="2" t="inlineStr"><is><t>' + xmlEsc(v) + "</t></is></c>";
+        if (v && typeof v === "object") return '<c r="' + ref + '" s="1"><v>' + serialOf(v.d) + "</v></c>";
+        if (typeof v === "number") return '<c r="' + ref + '"' + (MONEY[ci] ? ' s="3"' : "") + "><v>" + v + "</v></c>";
+        return '<c r="' + ref + '" t="inlineStr"><is><t>' + xmlEsc(v) + "</t></is></c>";
+      }).join("") + "</row>";
+    }).join("");
+    var widths = [8, 12, 16, 10, 12, 10, 14, 13, 8, 12, 14, 13, 16, 12, 12, 28];
+    var X = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>';
+    var NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+    var enc = new TextEncoder();
+    var files = [
+      ["[Content_Types].xml", X + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'],
+      ["_rels/.rels", X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'],
+      ["xl/workbook.xml", X + "<workbook " + NS + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Shoppee" sheetId="1" r:id="rId1"/></sheets></workbook>'],
+      ["xl/_rels/workbook.xml.rels", X + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'],
+      ["xl/styles.xml", X + "<styleSheet " + NS + '><numFmts count="1"><numFmt numFmtId="164" formatCode="yyyy\\-mm\\-dd"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Arial"/></font><font><b/><sz val="11"/><name val="Arial"/></font></fonts><fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/><xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'],
+      ["xl/worksheets/sheet1.xml", X + "<worksheet " + NS + '><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols>' +
+        widths.map(function (w, i) { return '<col min="' + (i + 1) + '" max="' + (i + 1) + '" width="' + w + '" customWidth="1"/>'; }).join("") + "</cols><sheetData>" + rowsXml + "</sheetData></worksheet>"]
+    ].map(function (f) { return { name: f[0], data: enc.encode(f[1]) }; });
+    return zipStore(files);
+  }
+  function csvCell(v) { var s = String(v == null ? "" : v); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  function buildCsv() {
+    return "﻿" + [HEAD].concat(exportRows()).map(function (r) { return r.map(csvCell).join(","); }).join("\r\n") + "\r\n";
+  }
+  function doSave(filename, data) {
+    $("ioErr").textContent = ""; $("ioOk").textContent = "";
+    if (!downloads) { $("ioErr").textContent = "มุมมองนี้ดาวน์โหลดไฟล์ไม่ได้"; return; }
+    if (!sales.length) { $("ioErr").textContent = "ยังไม่มีรายการให้ดาวน์โหลด"; return; }
+    downloads.save({ filename: filename, data: data }).then(function () { $("ioOk").textContent = "บันทึกไฟล์แล้ว"; })
+      .catch(function (e) { if (!e || e.code !== "declined") $("ioErr").textContent = "ดาวน์โหลดไม่สำเร็จ"; });
+  }
+  $("expXlsx").addEventListener("click", function () {
+    var rows = exportRows().map(function (r) { var x = r.slice(); x[1] = { d: r[1] }; return x; });
+    doSave("shopee-sales-" + todayISO() + ".xlsx", buildXlsx([HEAD].concat(rows)));
+  });
+  $("expCsv").addEventListener("click", function () { doSave("shopee-sales-" + todayISO() + ".csv", buildCsv()); });
+
+  /* readers */
+  async function inflateRaw(u8) {
+    var stream = new Blob([u8]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+  function unzip(buf) {
+    var u8 = new Uint8Array(buf), dv = new DataView(buf), i = u8.length - 22, out = {}, dec = new TextDecoder();
+    while (i >= 0 && dv.getUint32(i, true) !== 0x06054b50) i--;
+    if (i < 0) throw new Error("zip");
+    var cnt = dv.getUint16(i + 10, true), p = dv.getUint32(i + 16, true);
+    for (var k = 0; k < cnt; k++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) break;
+      var method = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true), nlen = dv.getUint16(p + 28, true), elen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+      var name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+      var ds = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
+      out[name] = { method: method, data: u8.subarray(ds, ds + csz) };
+      p += 46 + nlen + elen + clen;
+    }
+    return out;
+  }
+  async function entryText(e) {
+    if (!e) return null;
+    return new TextDecoder().decode(e.method === 0 ? e.data : await inflateRaw(e.data));
+  }
+  function colIndex(ref) { var m = /^([A-Z]+)(\d+)$/.exec(ref), c = 0; for (var i = 0; i < m[1].length; i++) c = c * 26 + m[1].charCodeAt(i) - 64; return [c - 1, +m[2] - 1]; }
+  async function xlsxToAoa(buf) {
+    if (typeof DecompressionStream === "undefined") throw new Error("nostream");
+    var z = unzip(buf), P = new DOMParser();
+    var wb = P.parseFromString(await entryText(z["xl/workbook.xml"]), "application/xml");
+    var rels = P.parseFromString(await entryText(z["xl/_rels/workbook.xml.rels"]), "application/xml");
+    var sheets = [].slice.call(wb.getElementsByTagName("sheet"));
+    var pick = sheets.filter(function (s) { return s.getAttribute("name") === "Shoppee"; })[0] || sheets[0];
+    var rid = pick.getAttribute("r:id");
+    var rel = [].slice.call(rels.getElementsByTagName("Relationship")).filter(function (r) { return r.getAttribute("Id") === rid; })[0];
+    var target = rel.getAttribute("Target"); target = target.charAt(0) === "/" ? target.slice(1) : "xl/" + target;
+    var shared = [], sst = await entryText(z["xl/sharedStrings.xml"]);
+    if (sst) {
+      [].slice.call(P.parseFromString(sst, "application/xml").getElementsByTagName("si")).forEach(function (si) {
+        shared.push([].slice.call(si.getElementsByTagName("t")).filter(function (t) { return t.parentNode.nodeName !== "rPh"; }).map(function (t) { return t.textContent; }).join(""));
+      });
+    }
+    var sh = P.parseFromString(await entryText(z[target]), "application/xml"), aoa = [];
+    [].slice.call(sh.getElementsByTagName("c")).forEach(function (c) {
+      var rc = colIndex(c.getAttribute("r")), t = c.getAttribute("t"), vEl = c.getElementsByTagName("v")[0], v = vEl ? vEl.textContent : null, val = null;
+      if (t === "s") val = v == null ? null : shared[+v];
+      else if (t === "str") val = v;
+      else if (t === "inlineStr") val = [].slice.call(c.getElementsByTagName("t")).map(function (x) { return x.textContent; }).join("");
+      else if (t === "b") val = v === "1";
+      else if (t === "e") val = null;
+      else val = v == null || v === "" ? null : Number(v);
+      if (val === "" ) val = null;
+      (aoa[rc[1]] = aoa[rc[1]] || [])[rc[0]] = val;
+    });
+    for (var r = 0; r < aoa.length; r++) aoa[r] = aoa[r] || [];
+    return aoa;
+  }
+  function csvToAoa(text) {
+    text = text.replace(/^﻿/, ""); var rows = [], row = [], cur = "", q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) { if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+      else if (ch === '"') q = true;
+      else if (ch === ",") { row.push(cur); cur = ""; }
+      else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; row.push(cur); rows.push(row); row = []; cur = ""; }
+      else cur += ch;
+    }
+    if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+    return rows.map(function (r) { return r.map(function (c) { return c === "" ? null : (isNaN(Number(c)) ? c : Number(c)); }); });
+  }
+  function num(v) { if (typeof v === "number") return v; if (typeof v === "string" && v.trim() !== "" && isFinite(Number(v))) return Number(v); return null; }
+  function aoaToDocs(aoa) {
+    var hi = -1, ix = {};
+    for (var i = 0; i < Math.min(aoa.length, 10) && hi < 0; i++) {
+      var names = (aoa[i] || []).map(function (c) { return typeof c === "string" ? c.trim() : c; });
+      if (names.indexOf("วันที่") >= 0 && names.indexOf("ชนิดพืช") >= 0) { hi = i; names.forEach(function (nm, j) { if (typeof nm === "string" && !(nm in ix)) ix[nm] = j; }); }
+    }
+    if (hi < 0) return { error: "ไม่พบหัวคอลัมน์ \"วันที่\" และ \"ชนิดพืช\" ในไฟล์" };
+    var g = function (row, name) { return name in ix ? row[ix[name]] : null; };
+    var existing = {};
+    sales.forEach(function (r) { var k = [r.date, r.plant, n(r.qty), n(r.revenue), n(r.fee), n(r.net)].join("|"); existing[k] = (existing[k] || 0) + 1; });
+    var out = { docs: [], dup: 0, skipped: 0 };
+    for (var r = hi + 1; r < aoa.length; r++) {
+      var row = aoa[r] || [], d = g(row, "วันที่"), plant = String(g(row, "ชนิดพืช") == null ? "" : g(row, "ชนิดพืช")).trim(), q = num(g(row, "จำนวนที่สั่ง"));
+      if ((d == null || d === "") && !plant) continue;
+      var iso = typeof d === "number" && d > 20000 ? isoOfSerial(d) : (/^\d{4}-\d{2}-\d{2}/.test(String(d)) ? String(d).slice(0, 10) : "");
+      if (!iso || !plant || !(q >= 1)) { out.skipped++; continue; }
+      var p = plantInfo(plant);
+      var price = num(g(row, "ราคาขาย")); if (price == null) price = p ? n(p.sell) : 0;
+      var rev = num(g(row, "รายได้")); if (rev == null) rev = round2(price * q);
+      var fee = num(g(row, "ค่าธรรมเนียม")) || 0;
+      var net = num(g(row, "รายได้สุทธิ")); if (net == null) net = round2(rev - fee);
+      var box = num(g(row, "ต้นทุนกล่อง")); if (box == null) box = boxCost(q);
+      var pack = num(g(row, "ต้นทุนการแพ็ค")); if (pack == null) pack = n(config && config.pack);
+      var tu = num(g(row, "ต้นทุนต้นไม้")); if (tu == null) tu = p ? n(p.buy) : 0;
+      var note = g(row, "หมายเหตุ");
+      var key = [iso, plant, q, rev, fee, net].join("|");
+      if (existing[key] > 0) { existing[key]--; out.dup++; continue; }
+      out.docs.push({ date: iso, plant: plant, price: price, qty: q, revenue: rev, fee: fee, net: net, ship: num(g(row, "ค่าส่ง")) || 0, box: box, pack: pack, treeUnit: tu, note: note == null ? "" : String(note).trim(), createdAt: new Date(Date.now() + out.docs.length).toISOString() });
+    }
+    return out;
+  }
+  var pendingImport = null;
+  function showPreview(res) {
+    var box = $("importPreview"); pendingImport = null;
+    if (res.error) { box.innerHTML = ""; $("ioErr").textContent = res.error; return; }
+    var html = '<div class="prev"><div><b>' + res.docs.length + "</b> รายการใหม่ · " + res.dup + " รายการซ้ำกับที่มีอยู่ (จะข้าม)" + (res.skipped ? " · " + res.skipped + " แถวข้ามเพราะข้อมูลไม่ครบ" : "") + "</div>";
+    if (res.docs.length) {
+      html += '<div class="scroll"><table><thead><tr><th>วันที่</th><th>ชนิดพืช</th><th>ต้น</th><th>ยอดขาย</th><th>สุทธิ</th></tr></thead><tbody>' +
+        res.docs.slice(0, 8).map(function (d) { return "<tr><td>" + dayLabel(d.date) + "</td><td>" + esc(d.plant) + "</td><td>" + fmt0(d.qty) + "</td><td>" + fmt(d.revenue) + "</td><td>" + fmt(d.net) + "</td></tr>"; }).join("") +
+        (res.docs.length > 8 ? '<tr><td colspan="5" class="m">และอีก ' + (res.docs.length - 8) + " รายการ</td></tr>" : "") + "</tbody></table></div>";
+      html += '<div class="actions"><button class="btn" type="button" id="doImport">นำเข้า ' + res.docs.length + ' รายการ</button><button class="btn ghost" type="button" id="cancelImport">ยกเลิก</button></div>';
+      pendingImport = res.docs;
+    }
+    box.innerHTML = html + "</div>";
+  }
+  $("importFile").addEventListener("change", async function () {
+    var f = this.files[0]; $("ioErr").textContent = ""; $("ioOk").textContent = ""; $("importPreview").innerHTML = ""; pendingImport = null;
+    if (!f) return;
+    try {
+      var aoa = /\.csv$/i.test(f.name) ? csvToAoa(await f.text()) : await xlsxToAoa(await f.arrayBuffer());
+      showPreview(aoaToDocs(aoa));
+    } catch (e) {
+      $("ioErr").textContent = e && e.message === "nostream" ? "เบราว์เซอร์นี้เปิดไฟล์ .xlsx ไม่ได้ ให้บันทึกเป็น CSV แล้วนำเข้าแทน" : "อ่านไฟล์ไม่สำเร็จ ตรวจว่าเป็นไฟล์ .xlsx หรือ .csv ที่ไม่เสีย";
+    }
+  });
+  $("importPreview").addEventListener("click", async function (e) {
+    if (e.target.id === "cancelImport") { $("importPreview").innerHTML = ""; $("importFile").value = ""; pendingImport = null; return; }
+    if (e.target.id !== "doImport" || !pendingImport || !db) return;
+    var docs = pendingImport, btn = e.target, done = 0; btn.disabled = true; $("ioErr").textContent = "";
+    try {
+      for (var i = 0; i < docs.length; i++) { await db.collection("sales").doc().set(docs[i]); done++; btn.textContent = "กำลังนำเข้า " + done + "/" + docs.length; }
+      $("importPreview").innerHTML = ""; $("importFile").value = ""; pendingImport = null;
+      $("ioOk").textContent = "นำเข้าแล้ว " + done + " รายการ";
+    } catch (er) {
+      $("ioErr").textContent = "นำเข้าได้ " + done + " จาก " + docs.length + " รายการ แล้วเกิดข้อผิดพลาด " + (er && er.code === "quota_exceeded" ? "(พื้นที่เก็บข้อมูลเต็ม)" : "ลองนำเข้าใหม่ ระบบจะข้ามรายการที่เข้าไปแล้ว");
+      pendingImport = null; $("importPreview").innerHTML = "";
+    }
+  });
+
+  /* ---------- render + data ---------- */
+  function renderAll() { renderFilters(); renderOverview(); renderList(); }
+  function setSync() {
+    if (!loaded.sales || !loaded.config) return;
+    clearTimeout(slow);
+    $("sync").textContent = "ซิงก์แล้ว · " + sales.length + " รายการ";
+  }
+  var slow = null;
+  function armSlow() { clearTimeout(slow); slow = setTimeout(function () { if (!(loaded.sales && loaded.config)) $("sync").textContent = "ยังเชื่อมต่อข้อมูลไม่ได้ ข้อมูลที่เห็นอาจไม่ล่าสุด"; }, 10000); }
+
+  function applyPermissions() {
+    if (!canWrite) {
+      $("banner").hidden = false; $("banner").textContent = "คุณดูข้อมูลได้อย่างเดียว การบันทึกและแก้ไขรายการต้องมีสิทธิ์ผู้ร่วมแก้ไข";
+      $("t-add").hidden = true; $("t-settings").hidden = true; $("importBox").hidden = true;
+      if (state.tab === "add" || state.tab === "settings") location.hash = "overview";
+    }
+  }
+
+  // initial paint with empty state, then data
+  F.date.value = todayISO();
+  renderFilters(); renderOverview(); renderList(); renderPlantSelect(); renderSettings(true);
+  showTab(location.hash.replace("#", ""));
+
+  /* ---------- Firebase (Firestore + Authentication) ---------- */
+  var DEFAULT_CONFIG = { pack: 2, ah: 6.6, bh: 6.95, ahMax: 6, bhMax: 10, big: 2, plants: [
+    { name: "สนสามใบ", buy: 15, sell: 49 }, { name: "สนแคริเบีย", buy: 15, sell: 49 }, { name: "สนแคชเมียร์", buy: 30, sell: 69 },
+    { name: "สนฉัตร", buy: 15, sell: 49 }, { name: "สนหอม", buy: 10, sell: 39 } ] };
+  var unsubs = [], seededConfig = false;
+  function snapErr(label) {
+    return function (e) { $("sync").textContent = e && e.code === "permission-denied" ? "บัญชีนี้ไม่มีสิทธิ์เข้าถึงข้อมูล ตรวจ Rules ใน Firebase" : label; };
+  }
+  function startData() {
+    stopData(); armSlow(); $("sync").textContent = "กำลังโหลดข้อมูล…";
+    unsubs.push(db.collection("sales").onSnapshot(function (snap) {
+      sales = snap.docs.map(function (d) { return Object.assign({}, d.data() || {}, { id: d.id }); });
+      loaded.sales = true; renderAll(); setSync();
+    }, snapErr("อ่านข้อมูลรายการขายไม่ได้")));
+    unsubs.push(db.doc("config/main").onSnapshot(function (snap) {
+      config = snap.exists ? snap.data() : null;
+      if (!snap.exists && !seededConfig) { seededConfig = true; db.doc("config/main").set(DEFAULT_CONFIG).catch(function () {}); }
+      loaded.config = true; renderPlantSelect(); renderSettings(false); renderFilters(); setSync();
+    }, snapErr("อ่านการตั้งค่าไม่ได้")));
+  }
+  function stopData() {
+    unsubs.forEach(function (f) { try { f(); } catch (e) {} }); unsubs = [];
+    sales = []; config = null; loaded = { sales: false, config: false }; clearTimeout(slow);
+  }
+  function gate(msg, showForm) { $("login").hidden = false; $("app").hidden = true; $("loginMsg").textContent = msg; $("loginForm").hidden = !showForm; }
+  (function boot() {
+    var C = window.FIREBASE_CONFIG || {};
+    if (!C.apiKey || String(C.apiKey).indexOf("YOUR_") === 0 || !C.projectId || String(C.projectId).indexOf("YOUR_") === 0) {
+      gate("ยังไม่ได้ใส่ค่า Firebase ในไฟล์ index.html ตามขั้นตอนที่ 2 ของคู่มือ", false); return;
+    }
+    if (typeof firebase === "undefined") { gate("โหลด Firebase ไม่สำเร็จ ตรวจการเชื่อมต่ออินเทอร์เน็ตแล้วรีเฟรชหน้า", false); return; }
+    firebase.initializeApp(C);
+    var auth = firebase.auth(), fs = firebase.firestore();
+    db = {
+      collection: function (c) {
+        var col = fs.collection(c);
+        return {
+          onSnapshot: function (next, err) { return col.onSnapshot(function (s) { next({ docs: s.docs.map(function (d) { return { id: d.id, data: function () { return d.data(); } }; }) }); }, err); },
+          doc: function (id) { var r = id ? col.doc(id) : col.doc(); return { set: function (d) { return r.set(d); }, delete: function () { return r.delete(); } }; }
+        };
+      },
+      doc: function (path) {
+        var r = fs.doc(path);
+        return { onSnapshot: function (next, err) { return r.onSnapshot(function (s) { next({ exists: s.exists, data: function () { return s.data(); } }); }, err); }, set: function (d) { return r.set(d); } };
+      }
+    };
+    downloads = { save: function (o) {
+      var blob = o.data instanceof Blob ? o.data : new Blob([o.data], { type: "text/csv;charset=utf-8" });
+      var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = o.filename; document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+      return Promise.resolve({ status: "saved" });
+    } };
+    $("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault(); $("loginErr").textContent = "";
+      var em = $("lEmail").value.trim(), pw = $("lPass").value;
+      if (!em || !pw) { $("loginErr").textContent = "กรุณาใส่อีเมลและรหัสผ่าน"; return; }
+      $("loginBtn").disabled = true;
+      auth.signInWithEmailAndPassword(em, pw).catch(function (er) {
+        var c = er && er.code || "";
+        $("loginErr").textContent = /invalid|wrong-password|user-not-found|credential/.test(c) ? "อีเมลหรือรหัสผ่านไม่ถูกต้อง" : c === "auth/too-many-requests" ? "ลองหลายครั้งเกินไป รอสักครู่แล้วลองใหม่" : "เข้าสู่ระบบไม่สำเร็จ (" + c + ")";
+      }).then(function () { $("loginBtn").disabled = false; });
+    });
+    $("signOut").addEventListener("click", function () { auth.signOut(); });
+    auth.onAuthStateChanged(function (u) {
+      if (u) { $("login").hidden = true; $("app").hidden = false; $("lPass").value = ""; startData(); drawChart(); }
+      else { stopData(); gate("เข้าสู่ระบบเพื่อดูและบันทึกข้อมูล", true); }
+    });
+  })();
+})();
+</script>
+</body>
+</html>
